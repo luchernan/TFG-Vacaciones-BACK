@@ -9,5 +9,7 @@ public interface ViajeService {
     ViajeDto update(Integer id, ViajeDto dto);
     void deleteById(Integer id);
     ViajeDto findById(Integer id);
+    List<ViajeDto> findByDestinoId(Integer destinoId);
+
     List<ViajeDto> findAll();
 }

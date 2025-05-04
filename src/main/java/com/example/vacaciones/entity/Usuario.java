@@ -67,8 +67,8 @@ public class Usuario {
     @Column(name = "ciudad_local", length = 100)
     private String ciudadLocal;
 
-    @Size(max = 255)
     @NotNull
+    @Size(max = 255)
     @Column(name = "fotoPerfil", nullable = false)
     private String fotoPerfil;
 

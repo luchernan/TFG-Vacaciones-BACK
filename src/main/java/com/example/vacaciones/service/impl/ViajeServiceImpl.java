@@ -3,7 +3,9 @@ package com.example.vacaciones.service.impl;
 import com.example.vacaciones.dao.DestinoRepository;
 import com.example.vacaciones.dao.UsuarioRepository;
 import com.example.vacaciones.dao.ViajeRepository;
+import com.example.vacaciones.dto.UsuarioDto;
 import com.example.vacaciones.dto.ViajeDto;
+import com.example.vacaciones.entity.Usuario;
 import com.example.vacaciones.entity.Viaje;
 import com.example.vacaciones.service.ViajeService;
 import com.example.vacaciones.exception.NotFoundException;
@@ -28,6 +30,11 @@ public class ViajeServiceImpl implements ViajeService {
         this.usuarioRepository = usuarioRepository;
         this.destinoRepository = destinoRepository;
         this.mapper = mapper;
+    }
+    @Override
+    public List<ViajeDto> findByDestinoId(Integer destinoId) {
+        List<Viaje> viajes = viajeRepository.findByDestinoId(destinoId);
+        return viajes.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Override
@@ -75,12 +82,14 @@ public class ViajeServiceImpl implements ViajeService {
     }
 
     private ViajeDto convertToDto(Viaje viaje) {
+        System.out.println("Fecha inicio: " + viaje.getFechaInicio());
+        System.out.println("Fecha fin: " + viaje.getFechaFin());
         return new ViajeDto(
                 viaje.getId(),
                 viaje.getUsuario().getId(),
                 viaje.getDestino().getId(),
                 viaje.getFechaInicio(),
-                viaje.getFechaFin()
-        );
+                viaje.getFechaFin(),
+                new UsuarioDto(viaje.getUsuario())        );
     }
 }

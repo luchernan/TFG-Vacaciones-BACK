@@ -15,4 +15,5 @@ public class ViajeDto implements Serializable {
     Integer destinoId;
     LocalDate fechaInicio;
     LocalDate fechaFin;
+    private UsuarioDto usuario;
 }

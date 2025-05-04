@@ -3,19 +3,45 @@ package com.example.vacaciones.service.impl;
 import com.example.vacaciones.dao.UsuarioRepository;
 import com.example.vacaciones.dto.UsuarioDto;
 import com.example.vacaciones.entity.Usuario;
+import com.example.vacaciones.exception.NotFoundException;
 import com.example.vacaciones.service.UsuarioService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final ModelMapper mapper;
+
+
+
+    @Override
+    @Transactional
+    public UsuarioDto alternarTipoUsuario(Integer idUsuario) {
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + idUsuario));
+
+        if ("local".equals(usuario.getTipoUsuario())) {
+            usuario.setTipoUsuario("viajero");
+        } else if ("viajero".equals(usuario.getTipoUsuario())) {
+            usuario.setTipoUsuario("local");
+        } else {
+            throw new RuntimeException("Tipo de usuario desconocido: " + usuario.getTipoUsuario());
+        }
+
+        Usuario actualizado = usuarioRepository.save(usuario);
+        return mapper.map(actualizado, UsuarioDto.class);
+    }
+
 
     @Autowired
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository, ModelMapper mapper) {
@@ -24,11 +50,81 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioDto create(UsuarioDto usuarioDto) {
-        Usuario usuario = mapper.map(usuarioDto, Usuario.class);
-        usuarioRepository.save(usuario);
+    public UsuarioDto findById(Long id) {
+        Usuario usuario = usuarioRepository.findById(Math.toIntExact(id))
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado con id: " + id));
         return mapper.map(usuario, UsuarioDto.class);
     }
+
+    @Override
+    public List<UsuarioDto> filtrarUsuarios(String genero, Integer edadMinima, Integer edadMaxima, String idioma) {
+        List<Usuario> usuarios = usuarioRepository.findAll(); // Obtener todos los usuarios
+
+        // Filtrado por género
+        if (genero != null && !genero.isEmpty()) {
+            usuarios = usuarios.stream()
+                    .filter(usuario -> usuario.getGenero().equalsIgnoreCase(genero))
+                    .collect(Collectors.toList());
+        }
+
+        // Filtrado por rango de edad
+        if (edadMinima != null && edadMaxima != null) {
+            usuarios = usuarios.stream()
+                    .filter(usuario -> calcularEdad(usuario.getId()) >= edadMinima
+                            && calcularEdad(usuario.getId()) <= edadMaxima)
+                    .collect(Collectors.toList());
+        }
+
+        // Filtrado por idioma
+        if (idioma != null && !idioma.isEmpty()) {
+            usuarios = usuarios.stream()
+                    .filter(usuario -> usuario.getIdioma().equalsIgnoreCase(idioma))
+                    .collect(Collectors.toList());
+        }
+
+        // Convertir a DTO antes de devolver usando ModelMapper
+        return usuarios.stream()
+                .map(usuario -> mapper.map(usuario, UsuarioDto.class)) // Usamos mapper para convertir la entidad a DTO
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public UsuarioDto create(UsuarioDto usuarioDto) {
+        try {
+            // Creación del objeto Usuario manualmente
+            Usuario usuario = new Usuario();
+            usuario.setEmail(usuarioDto.getEmail());
+            usuario.setPassword(usuarioDto.getPassword());
+            usuario.setFechaNacimiento(usuarioDto.getFechaNacimiento());
+            usuario.setNombre(usuarioDto.getNombre());
+            usuario.setGenero(usuarioDto.getGenero());
+            usuario.setDescripcion(usuarioDto.getDescripcion());
+            usuario.setTipoUsuario(usuarioDto.getTipoUsuario());
+            usuario.setIdioma(usuarioDto.getIdioma());
+            usuario.setPais(usuarioDto.getPais());
+            usuario.setCiudadLocal(usuarioDto.getCiudadLocal());
+
+            // Si fotoPerfil es null, asigna un valor por defecto
+            if (usuarioDto.getFotoPerfil() == null) {
+                usuario.setFotoPerfil("default.jpg"); // O cualquier valor predeterminado que desees
+            } else {
+                usuario.setFotoPerfil(usuarioDto.getFotoPerfil());
+            }
+
+            // Guardar el usuario en la base de datos
+            usuarioRepository.save(usuario);
+
+            // Convertir a UsuarioDto antes de devolverlo
+            return new UsuarioDto(usuario);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+
+
 
     @Override
     public UsuarioDto login(String email, String password) {
@@ -44,5 +140,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         if (usuario.getFechaNacimiento() == null) return -1;
         return Period.between(usuario.getFechaNacimiento(), LocalDate.now()).getYears();
+    }
+    @Override
+    public Optional<UsuarioDto> findByEmailAndPassword(String email, String password) {
+        return usuarioRepository.findByEmailAndPassword(email, password)
+                .map(usuario -> mapper.map(usuario, UsuarioDto.class));
     }
 }
