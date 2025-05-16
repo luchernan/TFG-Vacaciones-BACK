@@ -2,78 +2,101 @@ package com.example.vacaciones.service.impl;
 
 import com.example.vacaciones.dao.MensajeRepository;
 import com.example.vacaciones.dao.UsuarioRepository;
+import com.example.vacaciones.dao.ViajeRepository;
 import com.example.vacaciones.dto.MensajeDto;
 import com.example.vacaciones.entity.Mensaje;
 import com.example.vacaciones.entity.Usuario;
+import com.example.vacaciones.entity.Viaje;
 import com.example.vacaciones.service.MensajeService;
+import com.example.vacaciones.service.UsuarioService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
 @Service
 public class MensajeServiceImpl implements MensajeService {
 
-    private final MensajeRepository mensajeRepository;
-    private final UsuarioRepository usuarioRepository;
-    private final ModelMapper mapper;
+    @Autowired
+    private MensajeRepository mensajeRepository;
 
     @Autowired
-    public MensajeServiceImpl(MensajeRepository mensajeRepository, UsuarioRepository usuarioRepository, ModelMapper mapper) {
-        this.mensajeRepository = mensajeRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.mapper = mapper;
-    }
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private ViajeRepository viajeRepository;
 
     @Override
-    public MensajeDto create(MensajeDto dto) {
-        Usuario remitente = usuarioRepository.findById(dto.getRemitenteId()).orElseThrow();
-        Usuario destinatario = usuarioRepository.findById(dto.getDestinatarioId()).orElseThrow();
+    public void enviarMensaje(MensajeDto mensajeDto) {
+        // Convertir el MensajeDto a la entidad Mensaje
         Mensaje mensaje = new Mensaje();
-        mensaje.setRemitente(remitente);
-        mensaje.setDestinatario(destinatario);
-        mensaje.setContenido(dto.getContenido());
+
+        // Obtener el remitente como un objeto Usuario
+        Usuario remitente = usuarioRepository.findById(mensajeDto.getRemitenteId())
+                .orElseThrow(() -> new RuntimeException("Usuario remitente no encontrado"));
+
+        // Obtener el destinatario como un objeto Usuario
+        Usuario destinatario = usuarioRepository.findById(mensajeDto.getDestinatarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario destinatario no encontrado"));
+
+        // Obtener el viaje como un objeto Viaje
+        Viaje viaje = viajeRepository.findById(mensajeDto.getViajeId())
+                .orElseThrow(() -> new RuntimeException("Viaje no encontrado"));
+
+        // Asignar los valores al objeto Mensaje
+        mensaje.setRemitente(remitente);  // Establece el remitente como un objeto Usuario
+        mensaje.setDestinatario(destinatario);  // Establece el destinatario como un objeto Usuario
+        mensaje.setViaje(viaje);  // Establece el viaje como un objeto Viaje
+        mensaje.setContenido(mensajeDto.getContenido());
+
+        // Usar LocalDateTime en vez de Timestamp
+        mensaje.setFechaEnvio(mensajeDto.getFechaEnvio());
+
+        // Asegúrate de que en tu DTO tengas un método getter 'getLeido' correctamente definido
+        mensaje.setLeido(mensajeDto.getLeido());
+
+        // Guardar el mensaje en la base de datos
         mensajeRepository.save(mensaje);
-        return mapper.map(mensaje, MensajeDto.class);
     }
 
     @Override
-    public List<MensajeDto> findAllByDestinatarioId(Integer destinatarioId) {
-        return mensajeRepository.findByDestinatarioId(destinatarioId).stream()
-                .map(m -> mapper.map(m, MensajeDto.class))
-                .collect(Collectors.toList());
+    public List<MensajeDto> obtenerConversacionesUsuario(Long usuarioId) {
+        List<Mensaje> mensajes = mensajeRepository.findByRemitenteIdOrDestinatarioId(usuarioId, usuarioId);
+        return mensajes.stream().map(this::convertirADto).toList();
     }
 
     @Override
-    public List<MensajeDto> findAllByRemitenteId(Integer remitenteId) {
-        return mensajeRepository.findByRemitenteId(remitenteId).stream()
-                .map(m -> mapper.map(m, MensajeDto.class))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public MensajeDto marcarComoLeido(Integer id) {
-        Mensaje mensaje = mensajeRepository.findById(id).orElseThrow();
-        mensaje.setLeido(true);
-        mensajeRepository.save(mensaje);
-        return mapper.map(mensaje, MensajeDto.class);
-    }
-    @Override
-    public MensajeDto findById(Integer id) {
-        Mensaje mensaje = mensajeRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Mensaje no encontrado"));
-        return mapper.map(mensaje, MensajeDto.class);
-    }
-
-    @Override
-    public List<MensajeDto> findAll() {
+    public List<MensajeDto> obtenerMensajesEntreUsuarios(Long usuario1Id, Long usuario2Id, Long viajeId) {
         return mensajeRepository.findAll().stream()
-                .map(m -> mapper.map(m, MensajeDto.class))
-                .collect(Collectors.toList());
+                .filter(m -> (
+                        (m.getRemitente().getId().equals(usuario1Id) && m.getDestinatario().getId().equals(usuario2Id)) ||
+                                (m.getRemitente().getId().equals(usuario2Id) && m.getDestinatario().getId().equals(usuario1Id))
+                ) && m.getViaje().getId().equals(viajeId))
+                .map(this::convertirADto).toList();
+    }
+
+    private MensajeDto convertirADto(Mensaje m) {
+        MensajeDto dto = new MensajeDto();
+        dto.setId(m.getId());
+        dto.setRemitenteId(m.getRemitente().getId());  // Extraemos el ID del remitente
+        dto.setDestinatarioId(m.getDestinatario().getId());  // Extraemos el ID del destinatario
+        dto.setViajeId(m.getViaje().getId());  // Extraemos el ID del viaje
+        dto.setContenido(m.getContenido());
+        dto.setFechaEnvio(m.getFechaEnvio());
+        dto.setLeido(m.isLeido());
+        return dto;
     }
 }
+
+
+

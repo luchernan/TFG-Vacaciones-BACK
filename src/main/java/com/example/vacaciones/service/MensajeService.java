@@ -1,15 +1,11 @@
 package com.example.vacaciones.service;
-
-
-
-import com.example.vacaciones.dto.MensajeDto;
 import java.util.List;
 
+import com.example.vacaciones.dto.MensajeDto;
+import com.example.vacaciones.entity.Mensaje;
 public interface MensajeService {
-    MensajeDto create(MensajeDto mensajeDto);
-    List<MensajeDto> findAllByDestinatarioId(Integer destinatarioId);
-    List<MensajeDto> findAllByRemitenteId(Integer remitenteId);
-    MensajeDto marcarComoLeido(Integer id);
-    MensajeDto findById(Integer id);
-    List<MensajeDto> findAll();
+    void enviarMensaje(MensajeDto mensajeDto);
+    List<MensajeDto> obtenerConversacionesUsuario(Long usuarioId);
+    List<MensajeDto> obtenerMensajesEntreUsuarios(Long usuario1Id, Long usuario2Id, Long viajeId);
 }
+

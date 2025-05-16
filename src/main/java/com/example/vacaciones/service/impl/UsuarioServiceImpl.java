@@ -88,7 +88,51 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public UsuarioDto updateById(Integer id, UsuarioDto usuarioDto) {
+        try {
+            // Buscar el usuario existente por id
+            Usuario usuarioExistente = usuarioRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + id));
 
+            // Actualizar solo los campos permitidos
+            if (usuarioDto.getNombre() != null) {
+                usuarioExistente.setNombre(usuarioDto.getNombre());
+            }
+            if (usuarioDto.getFechaNacimiento() != null) {
+                usuarioExistente.setFechaNacimiento(usuarioDto.getFechaNacimiento());
+            }
+            if (usuarioDto.getGenero() != null) {
+                usuarioExistente.setGenero(usuarioDto.getGenero());
+            }
+            if (usuarioDto.getDescripcion() != null) {
+                usuarioExistente.setDescripcion(usuarioDto.getDescripcion());
+            }
+            if (usuarioDto.getTipoUsuario() != null) {
+                usuarioExistente.setTipoUsuario(usuarioDto.getTipoUsuario());
+            }
+            if (usuarioDto.getIdioma() != null) {
+                usuarioExistente.setIdioma(usuarioDto.getIdioma());
+            }
+            if (usuarioDto.getPais() != null) {
+                usuarioExistente.setPais(usuarioDto.getPais());
+            }
+            if (usuarioDto.getCiudadLocal() != null) {
+                usuarioExistente.setCiudadLocal(usuarioDto.getCiudadLocal());
+            }
+            if (usuarioDto.getFotoPerfil() != null) {
+                usuarioExistente.setFotoPerfil(usuarioDto.getFotoPerfil());
+            }
+
+            // Guardar los cambios
+            Usuario usuarioActualizado = usuarioRepository.save(usuarioExistente);
+
+            return new UsuarioDto(usuarioActualizado);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al actualizar el usuario: " + e.getMessage());
+        }
+    }
     @Override
     public UsuarioDto create(UsuarioDto usuarioDto) {
         try {

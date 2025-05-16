@@ -1,30 +1,27 @@
 package com.example.vacaciones.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 /**
  * DTO for {@link com.example.vacaciones.entity.Mensaje}
  */
+
+import lombok.Getter;
+import lombok.Setter;
+
 public class MensajeDto {
     private Integer id;
     private Integer remitenteId;
     private Integer destinatarioId;
+    private Integer viajeId;
     private String contenido;
     private LocalDateTime fechaEnvio;
     private Boolean leido;
 
-    public MensajeDto() {}
-
-    public MensajeDto(Integer id, Integer remitenteId, Integer destinatarioId, String contenido, LocalDateTime fechaEnvio, Boolean leido) {
-        this.id = id;
-        this.remitenteId = remitenteId;
-        this.destinatarioId = destinatarioId;
-        this.contenido = contenido;
-        this.fechaEnvio = fechaEnvio;
-        this.leido = leido;
-    }
-
-    // Getters y setters
+    // Getters y Setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -33,6 +30,9 @@ public class MensajeDto {
 
     public Integer getDestinatarioId() { return destinatarioId; }
     public void setDestinatarioId(Integer destinatarioId) { this.destinatarioId = destinatarioId; }
+
+    public Integer getViajeId() { return viajeId; }
+    public void setViajeId(Integer viajeId) { this.viajeId = viajeId; }
 
     public String getContenido() { return contenido; }
     public void setContenido(String contenido) { this.contenido = contenido; }
@@ -43,3 +43,4 @@ public class MensajeDto {
     public Boolean getLeido() { return leido; }
     public void setLeido(Boolean leido) { this.leido = leido; }
 }
+

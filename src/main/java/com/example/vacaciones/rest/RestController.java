@@ -3,6 +3,7 @@ package com.example.vacaciones.rest;
 
 import com.example.vacaciones.dao.UsuarioRepository;
 import com.example.vacaciones.dto.*;
+import com.example.vacaciones.entity.Mensaje;
 import com.example.vacaciones.entity.Usuario;
 import com.example.vacaciones.service.*;
 import com.example.vacaciones.service.impl.FotoperfilServiceImpl;
@@ -191,65 +192,20 @@ import java.util.Optional;
         FotoperfilDto dto = fotoperfilService.findByUrl(url);
         return ResponseEntity.ok(dto);
     }
-    /**
-     * Obtener todos los mensajes
-     * Ejemplo: GET http://localhost:8080/api/mensajes
-     */
-    @GetMapping("/mensajes")
-    public ResponseEntity<List<MensajeDto>> getAllMensajes() {
-        List<MensajeDto> mensajes = mensajeService.findAll();
-        return ResponseEntity.ok(mensajes);
-    }
 
-    /**
-     * Obtener un mensaje por ID
-     * Ejemplo: GET http://localhost:8080/api/mensajes/1
-     */
-    @GetMapping("/mensajes/{id}")
-    public ResponseEntity<MensajeDto> getMensajeById(@PathVariable Integer id) {
-        MensajeDto mensaje = mensajeService.findById(id);
-        return ResponseEntity.ok(mensaje);
-    }
-
-    /**
-     * Enviar un nuevo mensaje
-     * Ejemplo: POST http://localhost:8080/api/mensajes
-     * Body (JSON):
-     * {
-     *     "remitenteId": 1,
-     *     "destinatarioId": 2,
-     *     "contenido": "Hola, ¿qué tal?"
-     * }
-     */
-    @PostMapping("/mensajes")
-    public ResponseEntity<MensajeDto> createMensaje(@RequestBody MensajeDto mensajeDto) {
-        MensajeDto nuevoMensaje = mensajeService.create(mensajeDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoMensaje);
-    }
-    /**
-     * Crear un nuevo usuario
-     * Ejemplo: POST http://localhost:8080/api/usuarios
-     * Body (JSON):
-     * {
-     *   "email": "ejemplo@correo.com",
-     *   "password": "1234",
-     *   "fechaNacimiento": "2000-01-01",
-     *   "nombre": "Juan",
-     *   "genero": "hombre",
-     *   "descripcion": "Hola, soy Juan.",
-     *   "tipoUsuario": "viajero",
-     *   "idioma": "Español",
-     *   "pais": "España",
-     *   "ciudadLocal": "Madrid",
-     *   "fotoPerfil": "https://ejemplo.com/foto.jpg"
-     * }
-     */
     @PostMapping("/usuarios")
     public ResponseEntity<UsuarioDto> createUsuario(@RequestBody UsuarioDto usuarioDto) {
         UsuarioDto nuevoUsuario = usuarioService.create(usuarioDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
     }
 
+    @PutMapping("/usuarios/{id}")
+    public ResponseEntity<UsuarioDto> updateUsuario(
+            @PathVariable Integer id,
+            @RequestBody UsuarioDto usuarioDto) {
+        UsuarioDto usuarioActualizado = usuarioService.updateById(id, usuarioDto);
+        return ResponseEntity.ok(usuarioActualizado);
+    }
     /**
      * Inicio de sesión
      *
