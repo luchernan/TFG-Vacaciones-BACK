@@ -3,7 +3,6 @@ package com.example.vacaciones.rest;
 
 import com.example.vacaciones.dao.UsuarioRepository;
 import com.example.vacaciones.dto.*;
-import com.example.vacaciones.entity.Mensaje;
 import com.example.vacaciones.entity.Usuario;
 import com.example.vacaciones.service.*;
 import com.example.vacaciones.service.impl.FotoperfilServiceImpl;
@@ -20,21 +19,21 @@ import java.util.Optional;
 @org.springframework.web.bind.annotation.RestController
     @RequestMapping("${spring.data.rest.base-path:}")
     public class RestController {
-
+    private final ComentarioService comentarioService;
         private final DestinoService destinoService;
         private final ViajeService viajeService;
         private final FotoperfilService fotoperfilService;
-        private final MensajeService mensajeService;
+
     private final HttpSession session;
     private UsuarioService usuarioService;
 
 
     @Autowired
-    public RestController(DestinoService destinoService, ViajeService viajeService, UsuarioService usuarioService ,MensajeService mensajeService,HttpSession session, FotoperfilService fotoperfilService) {
+    public RestController(DestinoService destinoService, ComentarioService comentarioService, ViajeService viajeService, UsuarioService usuarioService,HttpSession session, FotoperfilService fotoperfilService) {
         this.destinoService = destinoService;
         this.viajeService = viajeService;
         this.fotoperfilService = fotoperfilService;
-        this.mensajeService = mensajeService;
+        this.comentarioService = comentarioService;
         this.usuarioService = usuarioService;
         this.session = session;
     }
@@ -64,6 +63,35 @@ import java.util.Optional;
     public ResponseEntity<DestinoDto> getDestinoById(@PathVariable Integer id) {
         DestinoDto destino = destinoService.findById(id);
         return ResponseEntity.ok(destino);
+    }
+
+
+//    COMENTARIOS
+
+
+    @PostMapping("/comentarios")
+    public ResponseEntity<ComentarioDto> crearComentario(@RequestBody ComentarioDto comentarioDto) {
+        ComentarioDto creado = comentarioService.crearComentario(comentarioDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+    }
+    @GetMapping("/viajes/{viajeId}/comentarios")
+    public ResponseEntity<List<ComentarioDto>> obtenerComentariosPorViaje(@PathVariable Integer viajeId) {
+        List<ComentarioDto> comentarios = comentarioService.obtenerComentariosPorViaje(viajeId);
+        return ResponseEntity.ok(comentarios);
+    }
+    @DeleteMapping("/comentarios/{id}")
+    public ResponseEntity<Void> eliminarComentario(@PathVariable Integer id) {
+        comentarioService.eliminarComentario(id);
+        return ResponseEntity.noContent().build();
+    }
+    /**
+     * GET /viajes/usuarios/{userId}/viajes-participados
+     */
+    @GetMapping("/usuarios/{userId}/viajes-participados")
+    public ResponseEntity<List<Integer>> getViajesParticipados(
+            @PathVariable Integer userId) {
+        List<Integer> ids = viajeService.getParticipatedTripIds(userId);
+        return ResponseEntity.ok(ids);
     }
 
     /**

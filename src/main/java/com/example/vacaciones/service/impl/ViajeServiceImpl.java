@@ -36,6 +36,10 @@ public class ViajeServiceImpl implements ViajeService {
         List<Viaje> viajes = viajeRepository.findByDestinoId(destinoId);
         return viajes.stream().map(this::convertToDto).collect(Collectors.toList());
     }
+    @Override
+    public List<Integer> getParticipatedTripIds(Integer userId) {
+        return viajeRepository.findParticipatedTripIds(userId);
+    }
 
     @Override
     public ViajeDto create(ViajeDto dto) {

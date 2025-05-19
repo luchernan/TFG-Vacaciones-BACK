@@ -1,16 +1,5 @@
 package com.example.vacaciones.rest;
 
-import com.example.vacaciones.dto.MensajeDto;
-import com.example.vacaciones.service.MensajeService;
-import com.example.vacaciones.service.impl.MensajeProducer;
-import com.example.vacaciones.service.impl.MensajeRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
-import java.util.List;
-
 //@org.springframework.web.bind.annotation.RestController
 //@RequestMapping("/api/mensajes")
 //public class MensajeController {

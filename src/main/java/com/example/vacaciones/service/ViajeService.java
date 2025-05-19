@@ -10,6 +10,6 @@ public interface ViajeService {
     void deleteById(Integer id);
     ViajeDto findById(Integer id);
     List<ViajeDto> findByDestinoId(Integer destinoId);
-
+    List<Integer> getParticipatedTripIds(Integer userId);
     List<ViajeDto> findAll();
 }
