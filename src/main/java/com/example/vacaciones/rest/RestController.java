@@ -260,15 +260,15 @@ import java.util.Optional;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UsuarioDto credenciales, HttpSession session) {
-        Optional<UsuarioDto> usuarioOpt = usuarioService.findByEmailAndPassword(credenciales.getEmail(), credenciales.getPassword());
-
-        if (usuarioOpt.isPresent()) {
-            session.setAttribute("usuario", usuarioOpt.get());
-            return ResponseEntity.ok(usuarioOpt.get());
-        } else {
+        try {
+            UsuarioDto usuario = usuarioService.login(credenciales.getEmail(), credenciales.getPassword());
+            session.setAttribute("usuario", usuario);
+            return ResponseEntity.ok(usuario);
+        } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
         }
     }
+
 
 
     @GetMapping("/usuario-logueado")

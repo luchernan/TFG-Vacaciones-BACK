@@ -16,9 +16,6 @@ public interface UsuarioService {
     int calcularEdad(Integer usuarioId);
     UsuarioDto alternarTipoUsuario(Integer idUsuario);
     List<UsuarioDto> filtrarUsuarios(String genero, Integer edadMinima, Integer edadMaxima, String idioma);
-    Optional<UsuarioDto> findByEmailAndPassword(String email, String password);
+//    Optional<UsuarioDto> findByEmailAndPassword(String email, String password);
     void updateProfilePhoto(String email, MultipartFile file) throws IOException;
-
-
-
 }

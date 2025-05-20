@@ -24,6 +24,8 @@ import java.util.List;
 
 @Configuration
 public class SecurityConfig {
+
+
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails user = User.builder()

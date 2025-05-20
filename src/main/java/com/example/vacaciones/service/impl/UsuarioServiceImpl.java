@@ -9,6 +9,7 @@ import com.example.vacaciones.service.UsuarioService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,7 +26,11 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final ModelMapper mapper;
-    private final StorageService storage; // para guardar ficheros en disco/S3/etc.
+    private final StorageService storage;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     @Override
     public void updateProfilePhoto(String email, MultipartFile file) throws IOException {
@@ -153,7 +158,8 @@ public class UsuarioServiceImpl implements UsuarioService {
             // Creación del objeto Usuario manualmente
             Usuario usuario = new Usuario();
             usuario.setEmail(usuarioDto.getEmail());
-            usuario.setPassword(usuarioDto.getPassword());
+//            usuario.setPassword(usuarioDto.getPassword());
+            usuario.setPassword(passwordEncoder.encode(usuarioDto.getPassword()));
             usuario.setFechaNacimiento(usuarioDto.getFechaNacimiento());
             usuario.setNombre(usuarioDto.getNombre());
             usuario.setGenero(usuarioDto.getGenero());
@@ -186,10 +192,16 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public UsuarioDto login(String email, String password) {
-        Usuario usuario = usuarioRepository.findByEmailAndPassword(email, password)
-                .orElseThrow(() -> new RuntimeException("Credenciales incorrectas"));
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email no registrado"));
+
+        if (!passwordEncoder.matches(password, usuario.getPassword())) {
+            throw new RuntimeException("Credenciales incorrectas");
+        }
+
         return mapper.map(usuario, UsuarioDto.class);
     }
+
 
     @Override
     public int calcularEdad(Integer usuarioId) {
@@ -199,9 +211,9 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (usuario.getFechaNacimiento() == null) return -1;
         return Period.between(usuario.getFechaNacimiento(), LocalDate.now()).getYears();
     }
-    @Override
-    public Optional<UsuarioDto> findByEmailAndPassword(String email, String password) {
-        return usuarioRepository.findByEmailAndPassword(email, password)
-                .map(usuario -> mapper.map(usuario, UsuarioDto.class));
-    }
+//    @Override
+//    public Optional<UsuarioDto> findByEmailAndPassword(String email, String password) {
+//        return usuarioRepository.findByEmailAndPassword(email, password)
+//                .map(usuario -> mapper.map(usuario, UsuarioDto.class));
+//    }
 }
