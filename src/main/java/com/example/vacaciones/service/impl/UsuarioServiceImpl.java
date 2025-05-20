@@ -4,12 +4,16 @@ import com.example.vacaciones.dao.UsuarioRepository;
 import com.example.vacaciones.dto.UsuarioDto;
 import com.example.vacaciones.entity.Usuario;
 import com.example.vacaciones.exception.NotFoundException;
+import com.example.vacaciones.service.StorageService;
 import com.example.vacaciones.service.UsuarioService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
@@ -21,8 +25,17 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final ModelMapper mapper;
+    private final StorageService storage; // para guardar ficheros en disco/S3/etc.
 
-
+    @Override
+    public void updateProfilePhoto(String email, MultipartFile file) throws IOException {
+        Usuario u = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("No existe usuario: " + email));
+        // Guardar fichero y obtener URL pública / ruta
+        String fotoUrl = storage.store(file);
+        u.setFotoPerfil(fotoUrl);
+        usuarioRepository.save(u);
+    }
 
     @Override
     @Transactional
@@ -44,9 +57,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 
     @Autowired
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, ModelMapper mapper) {
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, StorageService storage, ModelMapper mapper) {
         this.usuarioRepository = usuarioRepository;
         this.mapper = mapper;
+        this.storage = storage;
     }
 
     @Override

@@ -8,11 +8,15 @@ import com.example.vacaciones.service.*;
 import com.example.vacaciones.service.impl.FotoperfilServiceImpl;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +48,11 @@ import java.util.Optional;
 
         return ResponseEntity.ok(viajes);
     }
-
+    @PostMapping("/me/foto")
+    public ResponseEntity<Void> uploadPhoto(@RequestParam("file") MultipartFile file, Principal p) throws IOException {
+        usuarioService.updateProfilePhoto(p.getName(), file);
+        return ResponseEntity.noContent().build();
+    }
     /**
      * Obtener todos los destinos
      * Ejemplo: GET http://localhost:8080/api/destinos
@@ -54,7 +62,16 @@ import java.util.Optional;
         List<DestinoDto> destinos = destinoService.findAll();
         return ResponseEntity.ok(destinos);
     }
-
+    @DeleteMapping("/viajes/{id}")
+    public ResponseEntity<Void> deleteViajeById(@PathVariable Integer id) {
+        try {
+            viajeService.deleteById(id);
+            return ResponseEntity.noContent().build(); // 204
+        } catch (EmptyResultDataAccessException ex) {
+            // Si no existe el viaje con ese ID
+            return ResponseEntity.notFound().build(); // 404
+        }
+    }
     /**
      * Obtener un destino por ID
      * Ejemplo: GET http://localhost:8080/api/destinos/1

@@ -1,0 +1,9 @@
+package com.example.vacaciones.service;
+
+import java.io.IOException;
+import org.springframework.web.multipart.MultipartFile;
+
+public interface StorageService {
+    String store(MultipartFile file) throws IOException;
+}
+
