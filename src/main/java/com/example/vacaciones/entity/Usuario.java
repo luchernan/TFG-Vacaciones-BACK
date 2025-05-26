@@ -50,6 +50,10 @@ public class Usuario {
     @Column(name = "descripcion")
     private String descripcion;
 
+    @Lob
+    @Column(name = "instagram")
+    private String instagram;
+
     @NotNull
     @Lob
     @Column(name = "tipo_usuario", nullable = false)

@@ -51,6 +51,7 @@ public class UsuarioDto implements Serializable {
 
     private String genero;
     private String descripcion;
+    private String instagram;
 
     @NotNull
     private String tipoUsuario;
@@ -94,6 +95,7 @@ public class UsuarioDto implements Serializable {
         } else {
             this.edad = null;
         }
+        this.instagram = usuario.getInstagram();
 
     }
 

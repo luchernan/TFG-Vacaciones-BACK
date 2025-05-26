@@ -127,6 +127,9 @@ public class UsuarioServiceImpl implements UsuarioService {
             if (usuarioDto.getDescripcion() != null) {
                 usuarioExistente.setDescripcion(usuarioDto.getDescripcion());
             }
+            if (usuarioDto.getInstagram() != null) {
+                usuarioExistente.setInstagram(usuarioDto.getInstagram());
+            }
             if (usuarioDto.getTipoUsuario() != null) {
                 usuarioExistente.setTipoUsuario(usuarioDto.getTipoUsuario());
             }
@@ -164,6 +167,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             usuario.setNombre(usuarioDto.getNombre());
             usuario.setGenero(usuarioDto.getGenero());
             usuario.setDescripcion(usuarioDto.getDescripcion());
+            usuario.setInstagram(usuarioDto.getInstagram());
             usuario.setTipoUsuario(usuarioDto.getTipoUsuario());
             usuario.setIdioma(usuarioDto.getIdioma());
             usuario.setPais(usuarioDto.getPais());
