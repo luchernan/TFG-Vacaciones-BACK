@@ -24,42 +24,31 @@ import java.util.List;
 
 @Configuration
 public class SecurityConfig {
-
-
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails user = User.builder()
-                .username("lucas")
-                .password(passwordEncoder().encode("lucas"))
-                .roles("USER")
-                .build();
+                .username("lucas").password(passwordEncoder().encode("lucas")).roles("USER").build();
         return new InMemoryUserDetailsManager(user);
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .httpBasic(Customizer.withDefaults())
-                .build();
+                .httpBasic(Customizer.withDefaults()).build();
     }
-
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5174")); // frontend URL
+        config.setAllowedOrigins(List.of("http://localhost:5174"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
