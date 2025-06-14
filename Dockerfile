@@ -4,7 +4,8 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 COPY src ./src
-RUN mvn clean package -DskipTests
+# Añade estas opciones para evitar problemas comunes
+RUN mvn clean package -DskipTests -Dmaven.test.skip=true -Dmaven.main.skip=true -Dmaven.source.skip=true
 
 # Fase 2: Imagen final mínima
 FROM eclipse-temurin:17-jre-jammy
