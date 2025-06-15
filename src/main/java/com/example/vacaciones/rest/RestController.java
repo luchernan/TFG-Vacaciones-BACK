@@ -22,6 +22,7 @@ import java.util.Optional;
 
 @org.springframework.web.bind.annotation.RestController
     @RequestMapping("${spring.data.rest.base-path:}")
+@CrossOrigin(origins = "https://red-social-tawny-xi.vercel.app")
     public class RestController {
     private final ComentarioService comentarioService;
         private final DestinoService destinoService;
